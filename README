@@ -1,0 +1,8 @@
+A set of scripts and packages to configure and build an image to emulate Atari on FriendlyARM mini2440.
+
+How to use it:
+
+$ ./prepare.sh
+$ cd buildroot-2011.02/
+$ make
+
