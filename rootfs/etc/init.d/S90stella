@@ -1,0 +1,79 @@
+#! /bin/sh
+#
+# stella	Initialize environment for stella
+#
+
+initSound() {
+    if [ ! -e /dev/snd ]; then
+        mkdir -p /dev/snd/
+        ln -s /dev/pcmC0D0c  /dev/snd/pcmC0D0c
+        ln -s /dev/pcmC0D0p  /dev/snd/pcmC0D0p
+        ln -s /dev/controlC0 /dev/snd/controlC0
+        ln -s /dev/timer     /dev/snd/timer
+        chmod 0660 /dev/pcmC0D0c
+        chmod 0660 /dev/pcmC0D0p
+        chmod 0660 /dev/controlC0
+        chmod 0660 /dev/timer
+    fi
+}
+
+initJoystick() {
+    rm -Rf /dev/input/event0 /dev/input/event2
+}
+
+initFrameBuffer() {
+    export SDL_VIDEO_FBCON_ROTATION=CW
+}
+
+initTSLib() {
+    export TSLIB_TSEVENTTYPE=INPUT
+    export TSLIB_CONSOLEDEVICE=none
+    export TSLIB_FBDEVICE=/dev/fb0
+    export TSLIB_TSDEVICE=/dev/input/event1
+    export TSLIB_CALIBFILE=/etc/pointercal
+    export QWS_MOUSE_PROTO=tslib:/dev/input/event1
+    export SDL_MOUSEDRV=TSLIB
+    if [ ! -e /etc/pointercal ]; then
+        ts_calibrate
+    fi
+}
+
+initConfig() {
+    mv /stella /.stella &> /dev/null 
+    mv /root/stella /root/.stella &> /dev/null 
+}
+
+initStellaEnvironment() {
+    initTSLib
+    initFrameBuffer
+    initSound
+    initJoystick
+    initConfig
+}
+
+case "$1" in
+
+    start)
+        echo "Starting stella..."
+        initStellaEnvironment
+        stella & 
+    ;;
+
+    stop)
+        echo "Stopping stella..."
+        killall stella
+    ;;
+
+    restart|reload)
+        "$0" stop
+        "$0" start
+    ;;
+
+    *)
+        echo $"Usage: $0 {start|stop|restart}"
+        exit 1
+    ;;
+
+esac
+
+exit 0

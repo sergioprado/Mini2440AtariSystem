@@ -1,0 +1,6 @@
+#! /bin/sh
+#
+# stella: start mdev and create devices on /dev
+#
+echo /sbin/mdev > /proc/sys/kernel/hotplug
+mdev -s
